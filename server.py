@@ -36,7 +36,7 @@ async def add_people(people_json_list):
         session.add_all(all_people)
         await session.commit()
 
-MAX_REQUEST = 5
+MAX_REQUEST = 15
 
 async def main():
     await init_orm()
@@ -47,11 +47,12 @@ async def main():
                 coro = get_people(person_id, session)
                 coros.append(coro)
 
-            gather_coro = asyncio.gather(*coros)
+            gather_coro = asyncio.gather(*coros, return_exceptions=True)
             result = await gather_coro
             add_people_coro = add_people(result)
             add_people_task = asyncio.create_task(add_people_coro)
 
+    print(coros)
     await  add_people_task
     await  close_orm()
 
